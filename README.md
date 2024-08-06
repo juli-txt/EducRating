@@ -2,9 +2,12 @@
 Python package for rating systems usable in educational environments.
 
 This package can be used to determine the proficiency of users and difficulty of items in an educational setting.
-Currently there are three rating algorithms shipped within this 
+Currently there are three rating algorithms shipped within this:
+- Elo Rating System (Elo)
+- Multivariate Elo (M-Elo)
+- Multivariate Glicko (MV-Glicko)
 
-https://pypi.org/project/EducRating/
+The package is available here: https://pypi.org/project/EducRating/
 ## Setup
 To setup this repository, pull from the main branch.
 The distribution files can then be build with `py -m build`.
