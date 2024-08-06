@@ -6,3 +6,4 @@ src/EducRating.egg-info
 .coverage
 __pycache__
 html
+.pytest_cache
