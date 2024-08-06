@@ -1,0 +1,8 @@
+.pypirc
+.git
+dist
+venv
+src/EducRating.egg-info
+.coverage
+__pycache__
+html
