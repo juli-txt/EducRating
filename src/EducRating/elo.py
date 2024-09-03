@@ -10,7 +10,7 @@ class EloRating:
     """
 
     #: The value of the rating.
-    value: int
+    value: float
     #: The timestamp of the rating.
     timestamp: datetime
 
@@ -81,7 +81,7 @@ class Elo:
         user_rating: EloRating,
         prior_user_rating_update_count: int,
         prior_resource_rating_update_count: int,
-    ) -> dict[EloRating, EloRating]:
+    ) -> dict[str, EloRating]:
         """
         Calculate the updated ratings of a user and a resource.
 
@@ -100,7 +100,7 @@ class Elo:
 
         Returns
         -------
-        dict[EloRating, EloRating]
+        dict[str, EloRating]
             The updated ratings of the user and the resource.
         """
         return {

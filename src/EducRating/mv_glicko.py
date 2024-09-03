@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from math import log, pi, pow, sqrt
 from sys import maxsize
 
@@ -15,7 +15,7 @@ class MVGlickoRating:
     #: The deviation of the rating.
     deviation: float
     #: The timestamp of the rating.
-    timestamp: timedelta
+    timestamp: datetime
 
     def __init__(self, value: float, deviation: float, timestamp: timedelta) -> None:
         """
@@ -100,7 +100,7 @@ class MVGlicko:
         resource_rating: MVGlickoRating,
         user_rating: MVGlickoRating,
         all_user_ratings_of_user_on_concepts_of_resource: list[MVGlickoRating],
-    ) -> dict[MVGlickoRating, MVGlickoRating]:
+    ) -> dict[str, MVGlickoRating]:
         """
         Execute MV-Glicko algorithm and calculate the updated ratings.
 
@@ -117,7 +117,7 @@ class MVGlicko:
 
         Returns
         -------
-        dict[MVGlickoRating, MVGlickoRating]
+        dict[str, MVGlickoRating]
             The updated ratings of the user and the resource.
         """
         return {

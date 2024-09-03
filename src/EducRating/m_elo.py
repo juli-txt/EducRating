@@ -80,7 +80,7 @@ class MElo:
         all_user_ratings_on_concept_of_resource: list[MEloRating],
         prior_user_rating_update_count: int,
         prior_resource_rating_update_count: int,
-    ) -> dict[MEloRating, MEloRating]:
+    ) -> dict[str, MEloRating]:
         """
         Calculate the updated ratings of a user and a resource.
 
@@ -101,7 +101,7 @@ class MElo:
 
         Returns
         -------
-        dict[MEloRating, MEloRating]
+        dict[str, MEloRating]
             The updated ratings of the user and the resource.
         """
         return {
