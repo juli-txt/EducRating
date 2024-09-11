@@ -17,7 +17,7 @@ class MVGlickoRating:
     #: The timestamp of the rating.
     timestamp: datetime
 
-    def __init__(self, value: float, deviation: float, timestamp: timedelta) -> None:
+    def __init__(self, value: float, deviation: float, timestamp: datetime) -> None:
         """
         Initialize the MV-Glicko rating with a value, a deviation, and a timestamp.
 
@@ -27,7 +27,7 @@ class MVGlickoRating:
             The value of the rating.
         deviation : float
             The deviation of the rating.
-        timestamp : timedelta
+        timestamp : datetime
             The timestamp of the rating.
         """
         self.value = value
