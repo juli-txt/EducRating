@@ -1,6 +1,6 @@
 [project]
 name = "EducRating"
-version = "0.0.5"
+version = "0.0.7"
 authors = [
   { name="Julian Manz", email="julian.manz@hs-kempten.de" },
 ]

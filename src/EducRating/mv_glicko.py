@@ -125,6 +125,7 @@ class MVGlicko:
                 attempt=attempt,
                 user_rating=user_rating,
                 resource_rating=resource_rating,
+                all_user_ratings_of_user_on_concepts_of_resource=all_user_ratings_of_user_on_concepts_of_resource,
             ),
             "resource_rating": self.calculate_updated_resource_rating(
                 attempt=attempt,
@@ -138,6 +139,7 @@ class MVGlicko:
         attempt: Attempt,
         user_rating: MVGlickoRating,
         resource_rating: MVGlickoRating,
+        all_user_ratings_of_user_on_concepts_of_resource: list[MVGlickoRating],
     ) -> MVGlickoRating:
         """
         Calculate the updated rating of a user.
@@ -150,6 +152,8 @@ class MVGlicko:
             The current rating of the user.
         resource_rating : MVGlickoRating
             The current rating of the resource.
+        all_user_ratings_of_user_on_concepts_of_resource : list[MVGlickoRating]
+            The current ratings of the user on all concepts of the resource.
 
         Returns
         -------
@@ -178,8 +182,33 @@ class MVGlicko:
             rating_value_b=resource_rating.value,
         )
 
-        self.outcomes["expected_outcomes"].append(expected_outcome)
         self.outcomes["actual_outcomes"].append(float(attempt.is_attempt_correct))
+
+        # Calculate the average resource rating deviation
+        average_user_deviation_of_user_on_concepts_of_resource = (
+            self.calculate_average_user_rating_deviation(
+                user_ratings=all_user_ratings_of_user_on_concepts_of_resource
+            )
+        )
+
+        reduced_impact = self.calculate_reduced_impact(
+            rating_deviation=average_user_deviation_of_user_on_concepts_of_resource,
+        )
+
+        # Calculate the average user rating value of a user on all concepts of the resource.
+        average_user_rating_value_of_user_on_concepts_of_resource = (
+            self.calculate_average_user_rating_value(
+                user_ratings=all_user_ratings_of_user_on_concepts_of_resource
+            )
+        )
+
+        expected_outcome_of_user = self.calculate_expected_outcome(
+            reduced_impact=reduced_impact,
+            rating_value_a=average_user_rating_value_of_user_on_concepts_of_resource,
+            rating_value_b=resource_rating.value,
+        )
+
+        self.outcomes["expected_outcomes"].append(expected_outcome_of_user)
 
         delta_inverse_squared = self.calculate_delta_inverse_squared(
             reduced_impact=reduced_impact,
