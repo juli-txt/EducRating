@@ -69,3 +69,19 @@ def test_mv_glicko() -> None:
         mv_glicko.calculate_average_user_rating_deviation([])
     except ValueError:
         pass
+    
+    result = mv_glicko.calculate_updated_user_rating(
+        Attempt(
+            attempt_id=0,
+            user_id="test",
+            resource_id="test",
+            concept_id="test",
+            timestamp=datetime.now(),
+            is_attempt_correct=True,
+        ),
+        MVGlickoRating(value=1500, deviation=350, timestamp=datetime.now()),
+        MVGlickoRating(value=1500, deviation=350, timestamp=datetime.now()),
+        [],
+    )
+
+    assert mv_glicko.outcomes == {'actual_outcomes': [1.0, 1.0], 'expected_outcomes': [0.5]}

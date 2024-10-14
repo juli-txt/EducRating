@@ -29,9 +29,9 @@ class EloRating:
         self.timestamp = timestamp
 
 
-class Elo:
+class EloWithUncertainty:
     """
-    This class represents the basic Elo rating system with a fixed K-factor.
+    This class represents the Elo rating system with a uncertainty function.
     It has methods to calculate the update to the rating of a user and a resource.
     Source of algorithm: https://doi.org/10.48550/arXiv.1910.12581
     """
@@ -47,8 +47,6 @@ class Elo:
     influence_on_slope: float
     #: The weight of a resource.
     resource_weigth: float
-    #: The sensitivity of the rating system.
-    sensitivity: float
 
     # Outcomes:
     #: The expected and actual outcomes of the rating system.
@@ -59,7 +57,6 @@ class Elo:
         default_rating_value: float = 0.0,
         starting_user_weight: float = 1.8,
         influence_on_slope: float = 0.05,
-        sensitivity: float = 0.4
     ) -> None:
         """
         Initialize the Elo rating system with the default value and hyperparameters.
@@ -72,19 +69,18 @@ class Elo:
             The starting user weight.
         influence_on_slope : float = 0.05
             The influence on the slope.
-        sensitivity : float = 0.4
-            The sensitivity of the rating system.
         """
         self.default_rating_value = default_rating_value
         self.starting_user_weight = starting_user_weight
         self.influence_on_slope = influence_on_slope
-        self.sensitivity = sensitivity
 
     def calculate_updated_ratings(
         self,
         attempt: Attempt,
         resource_rating: EloRating,
         user_rating: EloRating,
+        prior_user_rating_update_count: int,
+        prior_resource_rating_update_count: int,
     ) -> dict[str, EloRating]:
         """
         Calculate the updated ratings of a user and a resource.
@@ -97,6 +93,10 @@ class Elo:
             The current rating of the resource.
         user_rating : EloRating
             The current rating of the user on the concept of the resource.
+        prior_user_rating_update_count : int
+            The number of prior updates to the user rating on the concept of the resource.
+        prior_resource_rating_update_count : int
+            The number of prior updates to the resource rating.
 
         Returns
         -------
@@ -108,11 +108,13 @@ class Elo:
                 attempt=attempt,
                 user_rating=user_rating,
                 resource_rating=resource_rating,
+                number_of_prior_items=prior_user_rating_update_count,
             ),
             "resource_rating": self.calculate_updated_resource_rating(
                 attempt=attempt,
                 user_rating=user_rating,
                 resource_rating=resource_rating,
+                number_of_prior_answers=prior_resource_rating_update_count,
             ),
         }
 
@@ -121,6 +123,7 @@ class Elo:
         attempt: Attempt,
         user_rating: EloRating,
         resource_rating: EloRating,
+        number_of_prior_items: int,
     ) -> EloRating:
         """
         Calculate the updated rating of a user.
@@ -133,6 +136,8 @@ class Elo:
             The current rating of the user on the concept of the resource.
         resource_rating : EloRating
             The current rating of the resource.
+        number_of_prior_items : int
+            The number of prior updates to the user rating on the concept of the resource.
 
         Returns
         -------
@@ -146,9 +151,12 @@ class Elo:
         self.outcomes["expected_outcomes"].append(expected_outcome)
         self.outcomes["actual_outcomes"].append(float(attempt.is_attempt_correct))
 
+        uncertainty: float = self.calculate_uncertainty(number_of_prior_items)
+
         return EloRating(
             value=self.calculate_new_user_rating(
                 rating_value=user_rating.value,
+                sensitivity=uncertainty,
                 expected_outcome=expected_outcome,
                 actual_outcome=float(attempt.is_attempt_correct),
             ),
@@ -158,6 +166,7 @@ class Elo:
     def calculate_new_user_rating(
         self,
         rating_value: float,
+        sensitivity: float,
         expected_outcome: float,
         actual_outcome: float,
     ) -> float:
@@ -168,6 +177,8 @@ class Elo:
         ----------
         rating_value : float
             The current rating of the user.
+        sensitivity : float
+            The sensitivity of the rating system.
         expected_outcome : float
             The outcome that is expected from the user.
         actual_outcome : float
@@ -178,13 +189,14 @@ class Elo:
         float
             The new rating of the user.
         """
-        return rating_value + self.sensitivity * (actual_outcome - expected_outcome)
+        return rating_value + sensitivity * (actual_outcome - expected_outcome)
 
     def calculate_updated_resource_rating(
         self,
         attempt: Attempt,
         user_rating: EloRating,
-        resource_rating: EloRating
+        resource_rating: EloRating,
+        number_of_prior_answers: int,
     ) -> EloRating:
         """
         Calculate the updated rating of a resource.
@@ -197,6 +209,8 @@ class Elo:
             The current rating of the user on the concept of the resource.
         resource_rating : EloRating
             The current rating of the resource.
+        number_of_prior_answers : int
+            The number of prior updates to the resource rating.
 
         Returns
         -------
@@ -208,9 +222,12 @@ class Elo:
             resource_rating_value=resource_rating.value,
         )
 
+        sensitivity: float = self.calculate_uncertainty(number_of_prior_answers)
+
         return EloRating(
             value=self.calculate_new_resource_rating(
                 rating_value=resource_rating.value,
+                sensitivity=sensitivity,
                 expected_outcome=expected_outcome,
                 actual_outcome=float(attempt.is_attempt_correct),
             ),
@@ -220,6 +237,7 @@ class Elo:
     def calculate_new_resource_rating(
         self,
         rating_value: float,
+        sensitivity: float,
         expected_outcome: float,
         actual_outcome: float,
     ) -> float:
@@ -230,6 +248,8 @@ class Elo:
         ----------
         rating_value : float
             The current rating of the resource.
+        sensitivity : float
+            The sensitivity of the rating system.
         expected_outcome : float
             The outcome that is expected from the user.
         actual_outcome : float
@@ -240,7 +260,7 @@ class Elo:
         float
             The new rating of the resource.
         """
-        return rating_value + self.sensitivity * (expected_outcome - actual_outcome)
+        return rating_value + sensitivity * (expected_outcome - actual_outcome)
 
     def calculate_expected_outcome(
         self,
@@ -263,3 +283,21 @@ class Elo:
             The outcome that is expected from the user.
         """
         return 1 / (1 + exp(-1 * (user_rating_value - resource_rating_value)))
+
+    def calculate_uncertainty(self, number_of_prior_answers: int) -> float:
+        """
+        Calculate a uncertaity value for the Elo rating system.
+
+        Parameters
+        ----------
+        number_of_prior_answers : int
+            The number of prior answers.
+
+        Returns
+        -------
+        float
+            The uncertainty value.
+        """
+        return self.starting_user_weight / (
+            1 + self.influence_on_slope * number_of_prior_answers
+        )

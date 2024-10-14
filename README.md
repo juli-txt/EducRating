@@ -26,5 +26,5 @@ The documentation is provided via docline and can be generated as `HTML` via `pd
 To view it, open the `index.html`-file with your browser.
 ## Testing
 All algorithms have been tested with Pytest.
-You can run the tests by yourself using the `coverage run -m --branch pytest'.
+You can run the tests by yourself using the `coverage run -m --branch pytest`.
 The results will be shown inside the console with `coverage report -m`. 
