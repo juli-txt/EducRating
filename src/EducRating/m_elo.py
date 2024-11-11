@@ -181,7 +181,7 @@ class MElo:
             rating_value_b=resource_rating.value,
         )
 
-        self.outcomes["expected_outcomes"].append(expected_outcome)
+        self.outcomes["expected_outcomes"].append(average_expected_outcome)
         self.outcomes["actual_outcomes"].append(float(attempt.is_attempt_correct))
 
         return MEloRating(
