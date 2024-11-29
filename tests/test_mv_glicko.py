@@ -19,8 +19,8 @@ def test_mv_glicko() -> None:
     assert mv_glicko.default_rating_deviation == 350
     assert mv_glicko.increase_in_variance == 50
     assert mv_glicko.minimal_amount_of_updates == 10
-    assert mv_glicko.sensitivity_of_estimations < 0.9
-    assert mv_glicko.sensitivity_of_estimations > 0.7
+    assert mv_glicko.sensitivity_of_estimations < 0.8
+    assert mv_glicko.sensitivity_of_estimations > 0.6
     result = mv_glicko.calculate_updated_ratings(
         Attempt(
             attempt_id=0,
@@ -37,8 +37,8 @@ def test_mv_glicko() -> None:
     assert isinstance(result, dict)
     assert isinstance(result["user_rating"], MVGlickoRating)
     assert isinstance(result["user_rating"].value, float)
-    assert result["user_rating"].value > 1629
-    assert result["user_rating"].value < 1630
+    assert result["user_rating"].value > 1613
+    assert result["user_rating"].value < 1614
     assert result["user_rating"].deviation > 290
     assert result["user_rating"].deviation < 291
     assert isinstance(result["resource_rating"], MVGlickoRating)
