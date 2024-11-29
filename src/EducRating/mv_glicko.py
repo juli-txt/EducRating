@@ -70,7 +70,7 @@ class MVGlicko:
         default_rating_deviation: float = 350.0,
         increase_in_variance: int = 50,
         minimal_amount_of_updates: int = 10,
-        sensitivity_of_estimations: float = 0.8,
+        sensitivity_of_estimations: float = 0.7,
     ) -> None:
         """
         Initialize MV-Glicko rating system with default values and hyperparameters.
